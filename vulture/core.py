@@ -349,7 +349,7 @@ class Vulture(ast.NodeVisitor):
         )
 
     def report(
-        self, min_confidence=0, sort_by_size=False, make_whitelist=False
+        self, min_confidence=0, sort_by_size=False, make_whitelist=False, file=None
     ):
         """
         Print ordered list of Item objects to stdout.
@@ -362,6 +362,7 @@ class Vulture(ast.NodeVisitor):
                 if make_whitelist
                 else item.get_report(add_size=sort_by_size),
                 force=True,
+                file=file
             )
             self.exit_code = ExitCode.DeadCode
         return self.exit_code
@@ -676,10 +677,13 @@ def main():
         ignore_decorators=config["ignore_decorators"],
     )
     vulture.scavenge(config["paths"], exclude=config["exclude"])
-    sys.exit(
-        vulture.report(
-            min_confidence=config["min_confidence"],
-            sort_by_size=config["sort_by_size"],
-            make_whitelist=config["make_whitelist"],
-        )
+
+    file = open(".vulture-report.txt", "w")
+    vulture.report(
+        min_confidence=config["min_confidence"],
+        sort_by_size=config["sort_by_size"],
+        make_whitelist=config["make_whitelist"],
+        file=file
     )
+    file.close()
+    sys.exit(0)
